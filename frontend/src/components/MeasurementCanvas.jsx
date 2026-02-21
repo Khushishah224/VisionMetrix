@@ -160,7 +160,8 @@ export default function MeasurementCanvas({
          */
         if (mode === 'auto') {
             const objects = result?.objects
-            if (!objects?.length) return   // transparent before detection
+            // If no objects found AND no static background available, stay transparent for live view
+            if (!objects?.length && !warpedSrc) return
 
             // Warped background (same contain-layout as manual modes)
             const layout = containRect(W, H)
@@ -282,8 +283,9 @@ export default function MeasurementCanvas({
         const lineColor = isDistance ? '#00e6b4' : '#a855f7'
         // hasMeasured: only true when the CURRENT points produced a result
         // (cleared points = not measured → allows new drawing)
-        const hasMeasured = (isDistance && result?.type === 'distance' && points.length === 2) ||
-            (!isDistance && result?.type === 'polygon' && points.length >= 3)
+        const hasMeasured =
+            (isDistance && result?.type === 'distance' && points.length === 2 && result.points?.length === 2) ||
+            (!isDistance && result?.type === 'polygon' && points.length >= 3 && result.points?.length === points.length)
 
         // 3. Connecting lines between placed points ───────────────
         if (absPoints.length >= 2) {
@@ -404,11 +406,19 @@ export default function MeasurementCanvas({
         if (rx < 0 || rx > 1 || ry < 0 || ry > 1) return
 
         const measuredDone =
-            (mode === 'distance' && points.length >= 2) ||
-            (mode === 'polygon' && result?.type === 'polygon' && points.length >= 3)
+            (mode === 'distance' && result?.type === 'distance' && points.length === 2 && result.points?.length === 2) ||
+            (mode === 'polygon' && result?.type === 'polygon' && result.points?.length === points.length)
+
+        const isNewStart = measuredDone || (points.length === 0)
         const base = measuredDone ? [] : points
         const next = [...base, [rx, ry]]
+
         onPointsChange(next)
+
+        // If we just clicked to start a NEW shape, clear the old result from the sidebar
+        if (isNewStart && result && onObjectSelect) {
+            onObjectSelect(null)
+        }
 
         if (mode === 'distance' && next.length === 2) {
             onMeasure(next.map(([rx, ry]) => [
@@ -440,7 +450,7 @@ export default function MeasurementCanvas({
     const handleMouseLeave = useCallback(() => setHover(null), [])
 
     const showPolygonBtn = mode === 'polygon' && points.length >= 3 &&
-        !(result?.type === 'polygon' && points.length >= 3)
+        !(result?.type === 'polygon' && result.points?.length === points.length)
     const lineColor = mode === 'distance' ? '#00e6b4' : '#a855f7'
 
     return (

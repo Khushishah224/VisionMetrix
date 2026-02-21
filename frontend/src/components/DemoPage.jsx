@@ -2,11 +2,11 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import {
   Camera, Crosshair, Ruler, Layers, RefreshCw,
   CheckCircle2, Loader2, ArrowLeft, ZapOff, Trash2,
-  Play, Square, Info, AlertTriangle, Eye
+  Play, Square, Info, AlertTriangle, Eye, Upload
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import {
-  detectA4, autoMeasure, manualDistance, manualPolygon,
+  detectA4, autoMeasure, uploadMeasure, manualDistance, manualPolygon,
   getOrCreateSessionId, captureCanvasBlob, getWarpedFrameUrl,
   UNITS,
 } from '../utils/api'
@@ -48,9 +48,11 @@ export default function DemoPage() {
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
   const [clickPoints, setClickPoints] = useState([])
+  const fileInputRef = useRef(null)
 
   /* in manual mode show the warped snapshot instead of live video */
-  const showWarped = mode !== MODES.AUTO && calibrated && warpedUrl
+  /* Show the warped snapshot if calibrated and (not in auto mode OR camera is off) */
+  const showWarped = calibrated && warpedUrl && (mode !== MODES.AUTO || !cameraActive)
 
   /* ── Camera ──────────────────────────────────────────── */
   const startCamera = useCallback(async () => {
@@ -144,8 +146,12 @@ export default function DemoPage() {
     }
   }
 
-  /* ── Object selection in auto mode ──────────────────────── */
+  /* ── Object selection in auto mode (or clearing results) ─── */
   const handleObjectSelect = useCallback((id) => {
+    if (id === null) {
+      setResult(null)
+      return
+    }
     setResult(prev => {
       if (!prev?.objects) return prev
       const obj = prev.objects[id]
@@ -153,6 +159,47 @@ export default function DemoPage() {
       return { ...prev, selected_id: id, ...obj }
     })
   }, [])
+
+  /* ── Step 2d: Upload Image ───────────────────────────── */
+  const handleUploadClick = () => fileInputRef.current?.click()
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setError(null)
+    setLoading(true)
+    setLoadingMsg('Processing uploaded image…')
+
+    // Auto stop camera if active to show static results
+    if (cameraActive) stopCamera()
+
+    try {
+      const res = await uploadMeasure(sessionId, file)
+      // res = { objects: [...], count: N, selected_id: 0, warped_b64, mm_per_pixel, message }
+
+      setMmPerPixel(res.mm_per_pixel)
+      setCalibrated(true)
+      // For upload mode, we use the returned base64 directly as the warped view
+      if (warpedUrl) URL.revokeObjectURL(warpedUrl)
+      setWarpedUrl(res.warped_b64)
+
+      const first = res.objects?.[0] || {}
+      setResult({
+        type: 'auto',
+        objects: res.objects || [],
+        selected_id: 0,
+        warped_b64: res.warped_b64,
+        ...first,
+      })
+      setClickPoints([])
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
 
   /* ── Step 2b/c: Manual (canvas clicks) ──────────────── */
@@ -194,7 +241,9 @@ export default function DemoPage() {
 
   /* ── Hint text ───────────────────────────────────────── */
   const hintText = (() => {
-    if (!cameraActive) return 'Click "Start Camera" to begin.'
+    if (loading) return loadingMsg
+    if (result && !cameraActive) return '✓ Measurement complete. Switch modes or upload another image.'
+    if (!cameraActive) return 'Click "Start Camera" to begin, or "Upload Image" to process a photo.'
     if (!calibrated) return 'STEP 1 — Place A4 in portrait (tall) orientation, all corners visible, then click "Detect A4".'
     if (mode === MODES.AUTO) return 'STEP 2 — Place your object on A4, then click "Auto Detect Object".'
     if (mode === MODES.DISTANCE) {
@@ -375,6 +424,29 @@ export default function DemoPage() {
                 </button>
               )}
 
+              <div style={{ width: 1, height: 20, background: 'var(--clr-border)', flexShrink: 0 }} />
+
+              <button
+                onClick={handleUploadClick}
+                disabled={loading}
+                className="btn-secondary"
+                style={{
+                  padding: '6px 14px', fontSize: '0.82rem', gap: '6px', whiteSpace: 'nowrap',
+                  background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)',
+                  color: '#a855f7'
+                }}
+              >
+                <Upload size={12} />
+                Upload Image
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
+
               {mode !== MODES.AUTO && calibrated && warpedUrl && (
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: '5px',
@@ -415,9 +487,9 @@ export default function DemoPage() {
                 onMeasure={handleCanvasPoints}
                 onObjectSelect={handleObjectSelect}
                 result={result}
-                warpedSrc={mode !== MODES.AUTO
-                  ? warpedUrl
-                  : result?.objects?.length ? (result.warped_b64 || warpedUrl) : null}
+                warpedSrc={(!cameraActive || mode !== MODES.AUTO)
+                  ? (result?.warped_b64 || warpedUrl)
+                  : (result?.objects?.length ? (result.warped_b64 || warpedUrl) : null)}
                 unit={unit}
               />
             )}
@@ -431,9 +503,9 @@ export default function DemoPage() {
             {cameraActive && mode === MODES.AUTO && !loading && <div className="scan-line" />}
 
             {/* Placeholders */}
-            {!cameraActive && !cameraError && (
+            {!cameraActive && !cameraError && !showWarped && (
               <div style={{ textAlign: 'center', padding: '40px' }}>
-                <Camera size={48} color="var(--clr-text-faint)" style={{ marginBottom: '16px' }} />
+                {/* <Camera size={48} color="var(--clr-text-faint)" style={{ marginBottom: '16px' }} /> */}
                 <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem', color: 'var(--clr-text-muted)', marginBottom: '8px' }}>
                   Camera not started
                 </p>

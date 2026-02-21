@@ -101,6 +101,19 @@ export async function autoMeasure(sessionId, imageBlob) {
 }
 
 /**
+ * Upload an image file for a complete measurement workflow.
+ * @param {string} sessionId
+ * @param {File} file
+ * @returns {Promise<Object>}
+ */
+export async function uploadMeasure(sessionId, file) {
+    const fd = new FormData()
+    fd.append('session_id', sessionId)
+    fd.append('file', file)
+    return apiFetch('/upload-measure', fd)
+}
+
+/**
  * Step 2b — Manual distance: measure distance between 2 clicked points.
  * @param {string} sessionId
  * @param {[number,number][]} points  Array of exactly 2 [x,y] pairs (warped image px)

@@ -451,14 +451,14 @@ function HowToGuide({ mode, calibrated }) {
         {
             done: false,
             num: '1',
-            title: 'Allow Camera',
-            detail: 'Click "Start Camera" and accept the browser permission prompt.',
+            title: 'Provide Image Source',
+            detail: 'Click "Start Camera" for live view, OR "Upload Image" to process a photo from your device.',
         },
         {
             done: calibrated,
             num: '2',
-            title: 'Detect A4 (Mandatory)',
-            detail: 'Click "Detect A4" — the frame is captured, A4 contour is located, perspective is corrected, and mm/px scale is stored in your session.',
+            title: 'Detect A4 & Calibrate',
+            detail: 'Calibration is automatic for uploads. For live view, click "Detect A4" when the sheet is fully visible.',
         },
         {
             done: false,

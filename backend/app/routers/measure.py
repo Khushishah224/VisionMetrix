@@ -200,3 +200,45 @@ async def manual_polygon(
 
     area = measure_polygon(pts, mm_per_pixel)
     return {"area_mm2": area}
+
+
+# ── POST /api/upload-measure ─────────────────────────────────────────
+@router.post("/upload-measure")
+async def upload_measure(
+    session_id: str       = Form(...),
+    file:        UploadFile = File(...),
+):
+    """
+    Combined workflow for static image uploads:
+    1. Detect A4 in the uploaded file.
+    2. Perspective-warp the A4 area to 800x1131.
+    3. Auto-detect objects in that warped frame.
+    4. Return measurements + the warped frame as base64.
+    """
+    image = read_image(await file.read())
+
+    # 1 & 2. Detect & Warp
+    try:
+        warped, mm_per_pixel, M = detect_and_warp_a4(image)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"A4 Detection Failed: {e}")
+
+    # Update session with these values so manual mode works on this image too
+    _, warped_buf = cv2.imencode(".png", warped)
+    set_session(session_id, mm_per_pixel, warped_buf.tobytes(), M)
+
+    # 3. Measure
+    try:
+        result = auto_detect_objects(warped, mm_per_pixel)
+        _, buffer = cv2.imencode(".png", warped)
+        warped_b64 = base64.b64encode(buffer).decode("utf-8")
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Object detection failed: {e}")
+
+    return {
+        **result,
+        "selected_id": 0,
+        "mm_per_pixel": round(mm_per_pixel, 6),
+        "warped_b64": f"data:image/png;base64,{warped_b64}",
+        "message": "Image uploaded and processed successfully."
+    }
