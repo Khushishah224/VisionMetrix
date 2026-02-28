@@ -1,6 +1,8 @@
 # 📐 VisionMetrix  
 ## A Vision-Based Measurement & Analytics Platform
 
+**🌐 Live Demo:** [https://visionmetrix.vercel.app/](https://visionmetrix.vercel.app/)
+
 
 
 https://github.com/user-attachments/assets/28fa1705-07b6-47a5-9498-481ae1ed904a
