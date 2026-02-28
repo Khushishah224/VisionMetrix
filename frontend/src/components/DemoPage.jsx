@@ -46,7 +46,38 @@ export default function DemoPage() {
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
   const [error, setError] = useState(null)
-  const [result, setResult] = useState(null)
+  const [modeResults, setModeResults] = useState({
+    [MODES.AUTO]: null,
+    [MODES.DISTANCE]: null,
+    [MODES.POLYGON]: null,
+  })
+  const [calibResult, setCalibResult] = useState(null)
+
+  const result = modeResults[mode] || (mode === MODES.AUTO ? calibResult : null)
+
+  const setResult = useCallback((newVal) => {
+    if (newVal === null) {
+      setModeResults(prev => ({ ...prev, [mode]: null }))
+      if (mode === MODES.AUTO) setCalibResult(null)
+      return
+    }
+    if (typeof newVal === 'function') {
+      setModeResults(prev => ({ ...prev, [mode]: newVal(prev[mode]) }))
+      return
+    }
+    if (newVal.type === 'calibration') {
+      setCalibResult(newVal)
+      setModeResults(prev => ({ ...prev, [MODES.AUTO]: null }))
+      return
+    }
+
+    const targetMode = newVal.type === 'auto' ? MODES.AUTO
+      : newVal.type === 'distance' ? MODES.DISTANCE
+        : newVal.type === 'polygon' ? MODES.POLYGON
+          : mode
+
+    setModeResults(prev => ({ ...prev, [targetMode]: newVal }))
+  }, [mode])
   const [clickPoints, setClickPoints] = useState([])
   const fileInputRef = useRef(null)
 
@@ -185,6 +216,7 @@ export default function DemoPage() {
       setWarpedUrl(res.warped_b64)
 
       const first = res.objects?.[0] || {}
+      setMode(MODES.AUTO)
       setResult({
         type: 'auto',
         objects: res.objects || [],
@@ -228,7 +260,9 @@ export default function DemoPage() {
 
   /* ── Reset ───────────────────────────────────────────── */
   const resetSession = () => {
-    setResult(null); setClickPoints([]); setError(null)
+    setModeResults({ [MODES.AUTO]: null, [MODES.DISTANCE]: null, [MODES.POLYGON]: null })
+    setCalibResult(null)
+    setClickPoints([]); setError(null)
     setCalibrated(false); setMmPerPixel(null)
     if (warpedUrl) URL.revokeObjectURL(warpedUrl)
     setWarpedUrl(null); setMode(MODES.AUTO)
@@ -236,7 +270,7 @@ export default function DemoPage() {
   }
 
   const switchMode = (m) => {
-    setMode(m); setClickPoints([]); setResult(null); setError(null)
+    setMode(m); setClickPoints([]); setError(null)
   }
 
   /* ── Hint text ───────────────────────────────────────── */
@@ -273,17 +307,17 @@ export default function DemoPage() {
     }}>
 
       {/* ── Top Bar ──────────────────────────────────────── */}
-      <header style={{
+      <header className="demo-header" style={{
         position: 'sticky', top: 0, zIndex: 50,
         background: 'var(--clr-navbar-scrolled)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--clr-border)',
-        padding: '0 24px', height: '60px',
+        padding: '0 24px', minHeight: '60px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: 'var(--clr-text-muted)' }}>
-            <ArrowLeft size={16} /><span style={{ fontSize: '0.85rem' }}>Home</span>
+          <Link to="/" className="demo-home-link" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: 'var(--clr-text-muted)' }}>
+            <ArrowLeft size={16} /><span className="demo-home-text" style={{ fontSize: '0.85rem' }}>Home</span>
           </Link>
           <div style={{ width: 1, height: 18, background: 'var(--clr-border)' }} />
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem' }}>
@@ -291,7 +325,7 @@ export default function DemoPage() {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="demo-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
           {/* Unit selector */}
           <div style={{ display: 'flex', background: 'var(--clr-bg)', border: '1px solid var(--clr-border)', borderRadius: '7px', padding: '2px', gap: '2px' }}>
             {UNITS.map((u) => (
@@ -342,7 +376,7 @@ export default function DemoPage() {
         <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           {/* ── Toolbar ──────────────────────────────────── */}
-          <div style={{
+          <div className="demo-toolbar" style={{
             padding: '10px 16px', borderBottom: '1px solid var(--clr-border)',
             background: 'var(--clr-surface)',
             display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
@@ -393,7 +427,7 @@ export default function DemoPage() {
             </div>
 
             {/* Action buttons */}
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div className="demo-toolbar-actions" style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
               <button
                 onClick={handleCalibrate}
                 disabled={loading || !cameraActive}
@@ -461,7 +495,7 @@ export default function DemoPage() {
           </div>
 
           {/* ── Viewport ─────────────────────────────────── */}
-          <div style={{
+          <div className="demo-viewport" style={{
             flex: 1, position: 'relative', overflow: 'hidden',
             background: isDark ? '#050810' : '#dde4ee',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -588,6 +622,38 @@ export default function DemoPage() {
             grid-template-columns: 1fr !important;
             grid-template-rows: auto auto;
             height: auto !important;
+          }
+          .demo-viewport {
+            flex: none !important;
+            height: 55vh;
+            min-height: 350px;
+            max-height: 500px;
+          }
+          .demo-toolbar {
+            justify-content: center;
+          }
+          .demo-toolbar-actions {
+            margin-left: 0 !important;
+            width: 100%;
+          }
+          .demo-results-panel {
+            border-left: none !important;
+            border-top: 1px solid var(--clr-border);
+            min-height: 400px;
+          }
+        }
+        @media (max-width: 600px) {
+          .demo-header {
+            flex-direction: column;
+            justify-content: center !important;
+            gap: 12px;
+            padding: 12px !important;
+          }
+          .demo-home-text {
+            display: none;
+          }
+          .demo-header-actions {
+            width: 100%;
           }
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

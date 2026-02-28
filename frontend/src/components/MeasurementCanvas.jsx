@@ -178,71 +178,73 @@ export default function MeasurementCanvas({
             const sy = renderH / WARP_DIMS.height
             const warpToCanvas = ([wx, wy]) => [offsetX + wx * sx, offsetY + wy * sy]
 
-            objects.forEach((obj, i) => {
-                const isSel = i === (result.selected_id ?? 0)
-                const BRIGHT = '#00e6b4'
-                const color = isSel ? BRIGHT : 'rgba(0,230,180,0.45)'
+            if (Array.isArray(objects)) {
+                objects.forEach((obj, i) => {
+                    const isSel = i === (result.selected_id ?? 0)
+                    const BRIGHT = '#00e6b4'
+                    const color = isSel ? BRIGHT : 'rgba(0,230,180,0.45)'
 
-                if (obj.polygon_points?.length) {
-                    // ── Draw shape outline ─────────────────────────────────
-                    const er = obj.ellipse_render
-                    const isRound = obj.shape_type === 'circle' || obj.shape_type === 'ellipse'
+                    if (obj.polygon_points?.length) {
+                        // ── Draw shape outline ─────────────────────────────────
+                        const er = obj.ellipse_render
+                        const isRound = obj.shape_type === 'circle' || obj.shape_type === 'ellipse'
 
-                    ctx.beginPath()
-                    if (isRound && er) {
-                        // Smooth ellipse / circle — ctx.ellipse uses canvas-space radii
-                        const [ecx, ecy] = warpToCanvas([er.cx, er.cy])
-                        const erx = er.rx * sx   // semi-major → canvas px
-                        const ery = er.ry * sy   // semi-minor → canvas px
-                        const eRad = (er.angle_deg ?? 0) * Math.PI / 180
-                        ctx.ellipse(ecx, ecy, erx, ery, eRad, 0, Math.PI * 2)
-                    } else if (obj.polygon_points?.length) {
-                        obj.polygon_points.map(warpToCanvas).forEach(([x, y], j) =>
-                            j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y))
-                        ctx.closePath()
-                    }
-                    ctx.strokeStyle = color
-                    ctx.lineWidth = isSel ? 2.5 : 1.5
-                    ctx.setLineDash(isSel ? [] : [5, 4])
-                    ctx.stroke(); ctx.setLineDash([])
-                    ctx.fillStyle = isSel ? 'rgba(0,230,180,0.12)' : 'rgba(0,230,180,0.03)'
-                    ctx.fill()
-
-                    // ── Badge + label ─────────────────────────────────────
-                    if (obj.centroid) {
-                        const [bx, by] = warpToCanvas(obj.centroid)
-                        const r = isSel ? 15 : 12
-                        ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2)
-                        ctx.fillStyle = isSel ? BRIGHT : 'rgba(0,230,180,0.5)'; ctx.fill()
-                        ctx.font = `bold ${isSel ? 12 : 10}px system-ui,sans-serif`
-                        ctx.fillStyle = '#060a14'
-                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-                        ctx.fillText(i + 1, bx, by)
-                        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'
-
-                        if (isSel) {
-                            // Shape-aware measurement label
-                            let labelText = ''
-                            if (obj.shape_type === 'circle' && obj.diameter_mm != null) {
-                                labelText = `⊙ ⌀${fmtLen(obj.diameter_mm, unit)}`
-                            } else if (obj.shape_type === 'ellipse' && obj.major_axis_mm != null) {
-                                labelText = `⬭ ${fmtLen(obj.major_axis_mm, unit)} × ${fmtLen(obj.minor_axis_mm, unit)}`
-                            } else if (obj.width_mm != null) {
-                                labelText = `${fmtLen(obj.width_mm, unit)} × ${fmtLen(obj.height_mm, unit)}`
-                            }
-                            if (labelText) drawLabel(ctx, labelText, bx, by - r - 14, BRIGHT)
+                        ctx.beginPath()
+                        if (isRound && er) {
+                            // Smooth ellipse / circle — ctx.ellipse uses canvas-space radii
+                            const [ecx, ecy] = warpToCanvas([er.cx, er.cy])
+                            const erx = er.rx * sx   // semi-major → canvas px
+                            const ery = er.ry * sy   // semi-minor → canvas px
+                            const eRad = (er.angle_deg ?? 0) * Math.PI / 180
+                            ctx.ellipse(ecx, ecy, erx, ery, eRad, 0, Math.PI * 2)
+                        } else if (Array.isArray(obj.polygon_points) && obj.polygon_points.length) {
+                            obj.polygon_points.map(warpToCanvas).forEach(([x, y], j) =>
+                                j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y))
+                            ctx.closePath()
                         }
-                    }
-                }   // end if polygon_points
-            })
+                        ctx.strokeStyle = color
+                        ctx.lineWidth = isSel ? 2.5 : 1.5
+                        ctx.setLineDash(isSel ? [] : [5, 4])
+                        ctx.stroke(); ctx.setLineDash([])
+                        ctx.fillStyle = isSel ? 'rgba(0,230,180,0.12)' : 'rgba(0,230,180,0.03)'
+                        ctx.fill()
+
+                        // ── Badge + label ─────────────────────────────────────
+                        if (obj.centroid) {
+                            const [bx, by] = warpToCanvas(obj.centroid)
+                            const r = isSel ? 15 : 12
+                            ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2)
+                            ctx.fillStyle = isSel ? BRIGHT : 'rgba(0,230,180,0.5)'; ctx.fill()
+                            ctx.font = `bold ${isSel ? 12 : 10}px system-ui,sans-serif`
+                            ctx.fillStyle = '#060a14'
+                            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+                            ctx.fillText(i + 1, bx, by)
+                            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'
+
+                            if (isSel) {
+                                // Shape-aware measurement label
+                                let labelText = ''
+                                if (obj.shape_type === 'circle' && obj.diameter_mm != null) {
+                                    labelText = `⊙ ⌀${fmtLen(obj.diameter_mm, unit)}`
+                                } else if (obj.shape_type === 'ellipse' && obj.major_axis_mm != null) {
+                                    labelText = `⬭ ${fmtLen(obj.major_axis_mm, unit)} × ${fmtLen(obj.minor_axis_mm, unit)}`
+                                } else if (obj.width_mm != null) {
+                                    labelText = `${fmtLen(obj.width_mm, unit)} × ${fmtLen(obj.height_mm, unit)}`
+                                }
+                                if (labelText) drawLabel(ctx, labelText, bx, by - r - 14, BRIGHT)
+                            }
+                        }
+                    }   // end if polygon_points
+                })
 
 
-            if (objects.length > 1) {
-                ctx.font = '11px system-ui,sans-serif'
-                ctx.fillStyle = 'rgba(255,255,255,0.4)'
-                ctx.textAlign = 'center'
-                ctx.fillText('Click an object to select it', offsetX + renderW / 2, offsetY + renderH + 14)
-                ctx.textAlign = 'left'
+                if (objects.length > 1) {
+                    ctx.font = '11px system-ui,sans-serif'
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)'
+                    ctx.textAlign = 'center'
+                    ctx.fillText('Click an object to select it', offsetX + renderW / 2, offsetY + renderH + 14)
+                    ctx.textAlign = 'left'
+                }
             }
             return
         }

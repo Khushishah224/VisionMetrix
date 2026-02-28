@@ -13,7 +13,7 @@ export default function ResultsPanel({
     mmPerPixel, sessionId, clickPoints, unit = 'mm', onClearError, onObjectSelect,
 }) {
     return (
-        <aside style={{
+        <aside className="demo-results-panel" style={{
             borderLeft: '1px solid var(--clr-border)',
             background: 'var(--clr-surface)',
             display: 'flex',
