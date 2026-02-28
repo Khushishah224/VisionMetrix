@@ -1,7 +1,11 @@
 # 📐 VisionMetrix  
 ## A Vision-Based Measurement & Analytics Platform
 
-https://github.com/Khushishah224/VisionMetrix/raw/main/media/demo_video.mp4
+
+
+https://github.com/user-attachments/assets/28fa1705-07b6-47a5-9498-481ae1ed904a
+
+
 
 <div align="center">
   <em>Demo Video for Demonstration of Measurement Engine in Action</em>
