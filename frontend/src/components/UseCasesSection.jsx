@@ -212,7 +212,7 @@ export default function UseCasesSection() {
                         </p>
                     </div>
                     <a
-                        href="#hero"
+                        href="http://localhost:8000/docs"
                         className="btn-primary"
                         id="usecase-cta-btn"
                         style={{ flexShrink: 0 }}

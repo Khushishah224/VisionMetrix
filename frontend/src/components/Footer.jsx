@@ -11,7 +11,7 @@ const footerLinks = {
     Platform: [
         { label: 'Roadmap', href: '#roadmap' },
         { label: 'Phase 2 Preview', href: '#cta' },
-        { label: 'API Docs', href: '#' },
+        { label: 'API Docs', href: 'http://localhost:8000/docs' },
         { label: 'Sign In', href: '/auth', isRoute: true },
     ],
     Technology: [
@@ -80,7 +80,7 @@ export default function Footer() {
 
                         {/* GitHub */}
                         <a
-                            href="https://github.com"
+                            href="https://github.com/Khushishah224/VisionMetrix"
                             target="_blank"
                             rel="noreferrer"
                             id="footer-github-btn"

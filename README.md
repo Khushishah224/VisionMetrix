@@ -517,6 +517,11 @@ session = {
 ### Backend Setup
 ```bash
 cd backend
+python -m venv venv 
+#windows
+venv\Scripts\activate 
+#linux
+#source venv/bin/activate
 pip install -r requirements.txt
 python run.py
 # Server runs at http://localhost:8000
@@ -540,7 +545,7 @@ FRONTEND_URL=http://localhost:5173
 
 **Frontend (.env):**
 ```env
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8000/api
 ```
 
 ---

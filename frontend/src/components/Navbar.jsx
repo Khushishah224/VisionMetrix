@@ -98,9 +98,9 @@ export default function Navbar() {
             {/* Theme toggle button */}
             <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
 
-            <Link to="/auth" className="btn-ghost" id="nav-signin-btn">
+            {/* <Link to="/auth" className="btn-ghost" id="nav-signin-btn">
               Sign In
-            </Link>
+            </Link> */}
             <Link
               to="/demo"
               className="btn-primary"
