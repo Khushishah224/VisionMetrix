@@ -90,13 +90,8 @@ export default function DemoPage() {
     setCameraError(null)
     setError(null)
     try {
-      const isMobile = window.innerWidth <= 900
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: isMobile ? 1080 : 1920 },
-          height: { ideal: isMobile ? 1920 : 1080 },
-          facingMode: 'environment'
-        },
+        video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment' },
         audio: false,
       })
       streamRef.current = stream
@@ -629,7 +624,10 @@ export default function DemoPage() {
             height: auto !important;
           }
           .demo-viewport {
-            min-height: 60vh;
+            flex: none !important;
+            height: 55vh;
+            min-height: 350px;
+            max-height: 500px;
           }
           .demo-toolbar {
             justify-content: center;
