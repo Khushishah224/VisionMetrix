@@ -2,7 +2,7 @@
 ## A Vision-Based Measurement & Analytics Platform
 
 <div align="center">
-  <video src="./media/demo_video.mp4" controls width="800" autoplay loop muted playsinline></video>
+  <video src="https://github.com/Khushishah224/VisionMetrix/raw/main/media/demo_video.mp4" controls width="800" autoplay loop muted playsinline></video>
   <br/>
   <em>Demo Video for Demonstration of Measurement Engine in Action</em>
 </div>
