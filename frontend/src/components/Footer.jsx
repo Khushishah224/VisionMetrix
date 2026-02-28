@@ -146,9 +146,7 @@ export default function Footer() {
                     }}
                 >
                     <span style={{ fontSize: '0.8rem', color: 'var(--clr-text-faint)' }}>
-                        © 2026 VisionMetrix · Built with
-                        {' '}<Heart size={11} color="#ff5f56" style={{ display: 'inline', verticalAlign: 'middle', margin: '0 2px' }} />{' '}
-                        and OpenCV
+                        © 2026 VisionMetrix
                     </span>
 
                     {/* Phase status */}
@@ -162,7 +160,7 @@ export default function Footer() {
                             }}
                         />
                         <span style={{ fontSize: '0.78rem', color: 'var(--clr-text-faint)' }}>
-                            Phase 1 Active · Phase 2 in Development
+                            Phase 1 Active
                         </span>
                     </div>
                 </div>

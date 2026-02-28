@@ -92,8 +92,7 @@ export default function CtaSection() {
                             lineHeight: 1.75,
                         }}
                     >
-                        Try VisionMetrix demo instantly — no account needed. Or sign in to
-                        unlock advanced features like measurement history and multi-store management.
+                        Try VisionMetrix demo instantly — no account needed.
                     </p>
 
                     {/* Highlights */}

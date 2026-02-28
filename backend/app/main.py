@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import measure
 
-app = FastAPI(title="VisionMetrix Phase 1", version="1.0.0")
+app = FastAPI(title="VisionMetrix", version="1.0.0")
 
 # ── CORS ──────────────────────────────────────────────────────────────
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -24,4 +24,4 @@ app.include_router(measure.router, prefix="/api")
 
 @app.get("/")
 async def root():
-    return {"status": "VisionMetrix Phase 1 API running", "docs": "/docs"}
+    return {"status": "VisionMetrix API running", "docs": "/docs"}

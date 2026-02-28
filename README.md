@@ -1,5 +1,11 @@
-# VisionMetrix  
+# 📐 VisionMetrix  
 ## A Vision-Based Measurement & Analytics Platform
+
+<div align="center">
+  <video src="./media/demo_video.mp4" controls width="800" autoplay loop muted playsinline></video>
+  <br/>
+  <em>Demo Video for Demonstration of Measurement Engine in Action</em>
+</div>
 
 ---
 
@@ -10,54 +16,46 @@ VisionMetrix is a computer vision platform that enables real-world object measur
 **Core Capabilities:**
 - Multi-object automatic detection and measurement
 - Manual point-to-point and polygon area measurement  
-- Real-time webcam integration with live preview
-- Multi-unit support (mm, cm, m, inch, ft)
+- Real-time webcam/smartphone camera integration with live preview
+- Multi-unit support (mm, cm, inch)
 - Shape classification (circle, ellipse, polygon)
 - Shadow and lighting compensation
 - Sub-pixel accuracy refinement
 
-The long-term vision is to evolve into a full measurement + analytics + industrial management system.
+The platform delivers a production-ready measurement system with both automatic and manual modes, accessible through a modern web interface.
 
 ---
 
-# 2. Phase 1 Implementation — ✅ COMPLETED
-
-### Scope: Full-Stack Measurement Engine with Interactive UI
-
-Phase 1 delivers a production-ready measurement system with both automatic and manual modes, accessible through a modern web interface.
-
----
-
-## 2.1 System Architecture
+## 2. System Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│              Frontend (React + Vite)                │
-│  ┌────────────────────────────────────────────┐    │
-│  │  Landing Page  │  Demo Page (Measurement)  │    │
-│  │  • Hero        │  • Camera Preview         │    │
-│  │  • Features    │  • Calibration            │    │
-│  │  • Use Cases   │  • Auto/Manual Modes      │    │
-│  │  • How It Works│  • Results Display        │    │
-│  └────────────────────────────────────────────┘    │
-│             Canvas Overlay + API Calls              │
-└──────────────────────┬──────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│              Frontend (React + Vite)             │
+│  ┌────────────────────────────────────────────┐  │
+│  │  Landing Page  │  Demo Page (Measurement)  │  │
+│  │  • Hero        │  • Camera Preview         │  │
+│  │  • Features    │  • Calibration            │  │
+│  │  • Use Cases   │  • Auto/Manual Modes      │  │
+│  │  • How It Works│  • Results Display        │  │
+│  └────────────────────────────────────────────┘  │
+│             Canvas Overlay + API Calls           │
+└──────────────────────┬───────────────────────────┘
                        │ HTTP / JSON
-┌──────────────────────▼──────────────────────────────┐
-│           Backend (FastAPI + OpenCV)                │
-│  ┌────────────────────────────────────────────┐    │
-│  │  /api/detect-a4      → Calibration         │    │
-│  │  /api/auto-measure   → Multi-object detect │    │
-│  │  /api/manual-distance→ Point-to-point      │    │
-│  │  /api/manual-polygon → Polygon area        │    │
-│  └────────────────────────────────────────────┘    │
-│        Session Store (In-Memory Dictionary)         │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────▼───────────────────────────┐
+│           Backend (FastAPI + OpenCV)             │
+│  ┌────────────────────────────────────────────┐  │
+│  │  /api/detect-a4      → Calibration         │  │
+│  │  /api/auto-measure   → Multi-object detect │  │
+│  │  /api/manual-distance→ Point-to-point      │  │
+│  │  /api/manual-polygon → Polygon area        │  │
+│  └────────────────────────────────────────────┘  │
+│        Session Store (In-Memory Dictionary)      │
+└──────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2.2 Technical Stack
+## 3. Technical Stack
 
 ### Backend
 - **FastAPI** — Modern async Python web framework with automatic OpenAPI docs
@@ -81,7 +79,7 @@ Phase 1 delivers a production-ready measurement system with both automatic and m
 
 ---
 
-## 2.3 Computer Vision Technologies & Theories Applied
+## 4. Computer Vision Technologies & Theories Applied
 
 ### 🔷 1. A4 Reference Sheet Detection
 
@@ -102,9 +100,9 @@ Image → Grayscale → Edge Detection (6 strategies) → Contour Finding
 6. **Otsu's Threshold** — Automatic global threshold selection
 
 **Validation Pipeline:**
-- ① **Area Filter:** 8% ≤ contour area ≤ 97% of frame (eliminates noise + full-frame artifacts)
-- ② **Four-Point Approximation:** Douglas-Peucker algorithm (ε = 0.02–0.05 × perimeter)
-- ③ **Aspect Ratio Check:** 1.0 < AR < 1.8 (A4 true ratio = 297/210 ≈ 1.414 ± 30% tolerance)
+- **Area Filter:** 8% ≤ contour area ≤ 97% of frame (eliminates noise + full-frame artifacts)
+- **Four-Point Approximation:** Douglas-Peucker algorithm (ε = 0.02–0.05 × perimeter)
+- **Aspect Ratio Check:** 1.0 < AR < 1.8 (A4 true ratio = 297/210 ≈ 1.414 ± 30% tolerance)
 
 **Sub-Pixel Corner Refinement:**
 - **cv2.cornerSubPix** with 11×11 search window and 40 iterations
@@ -119,11 +117,11 @@ Image → Grayscale → Edge Detection (6 strategies) → Contour Finding
 **Mathematical Foundation:**
 ```
 Homography Matrix H (3×3):
-┌         ┐     ┌         ┐
-│ x'      │     │ h₀₀ h₀₁ h₀₂ │ │ x │
-│ y'      │  =  │ h₁₀ h₁₁ h₁₂ │ │ y │
-│ w'      │     │ h₂₀ h₂₁ h₂₂ │ │ 1 │
-└         ┘     └         ┘     └   ┘
+┌   ┐     ┌             ┐ ┌   ┐
+│ x'│     │ h₀₀ h₀₁ h₀₂ │ │ x │
+│ y'│  =  │ h₁₀ h₁₁ h₁₂ │ │ y │
+│ w'│     │ h₂₀ h₂₁ h₂₂ │ │ 1 │
+└   ┘     └             ┘ └   ┘
 
 x_dst = x'/w',  y_dst = y'/w'
 ```
@@ -191,7 +189,7 @@ Warped A4 → Shadow Normalization → Multi-Strategy Edges → Morphological Cl
 - Keeps largest-area contour per cluster
 - **Purpose:** Removes duplicate detections from multiple edge strategies
 
-**Output:** Up to 10 distinct objects per frame (sorted by area descending)
+**Output:** Distinct geometric objects per frame (sorted by area descending)
 
 ### 🔷 5. PCA-Based Object Measurement
 
@@ -286,14 +284,14 @@ Accuracy: <0.01% error for any eccentricity
 
 ### 🔷 8. Session Management
 
-**Architecture:** In-memory Python dictionary (no database in Phase 1)
+**Architecture:** In-memory Python dictionary
 
 **Stored Per Session:**
 ```python
 session = {
     'mm_per_pixel': float,       # 0.2625 for standard calibration
-    'warped_bytes': bytes,        # PNG-encoded warped A4 image
-    'homography_matrix': ndarray  # 3×3 perspective transform (unused in Phase 1)
+    'warped_bytes': bytes,       # PNG-encoded warped A4 image
+    'homography_matrix': ndarray # 3×3 perspective transform
 }
 ```
 
@@ -302,173 +300,31 @@ session = {
 **Lifecycle:**
 1. **Calibration** (`/api/detect-a4`) → creates session entry
 2. **Measurement** (`/api/auto-measure`, `/api/manual-*`) → requires session
-3. **Expiry:** Lost on server restart (no persistence)
+3. **Expiry:** Lost on server restart (in-memory implementation)
 
 ---
 
-## 2.4 API Endpoints
+## 5. API Endpoints
 
-### `POST /api/detect-a4`
-**Purpose:** Calibrate measurement scale using A4 reference sheet
+*Refer to [`backend/README.md`](./backend/README.md) for backend features and long-term vision.*
 
-**Input:** 
-- `session_id` (form field)
-- `file` (image upload)
+## 6. Frontend Features
 
-**Output:**
-```json
-{
-  "mm_per_pixel": 0.2625,
-  "message": "A4 detected and perspective corrected successfully."
-}
-```
+*Refer to [`frontend/README.md`](./frontend/README.md) for frontend features and long-term vision.*
 
-**Process:** Edge detection → 4-point quad → sub-pixel refinement → homography → scale calculation
+## 7. Measurement Accuracy
 
----
+<div align="center">
+  <img src="./media/compare_original_detected.jpeg" alt="Original vs Detected Comparison" width="800" />
+  <br/>
+  <em>Comparison: VisionMetrix Detection Overlay vs. Original Image </em>
+</div>
 
-### `POST /api/auto-measure`
-**Purpose:** Detect and measure all objects on A4 sheet
-
-**Input:** 
-- `session_id` (form field)
-- `file` (image upload)
-
-**Output:**
-```json
-{
-  "objects": [
-    {
-      "id": 0,
-      "width_mm": 85.4,
-      "height_mm": 54.2,
-      "area_mm2": 4629.3,
-      "shape_type": "polygon",
-      "polygon_points": [[x1,y1], [x2,y2], ...],
-      "centroid": [400, 565],
-      "angle_deg": 15.3,
-      "circularity": 0.891
-    }
-  ],
-  "count": 1,
-  "selected_id": 0,
-  "warped_b64": "data:image/png;base64,..."
-}
-```
-
-**Process:** Shadow normalization → multi-strategy edge detection → contour validation → NMS deduplication → PCA measurement → shape classification
-
-**Fallback:** If A4 detection fails in new frame, uses warped image from calibration
-
----
-
-### `POST /api/manual-distance`
-**Purpose:** Measure distance between two user-clicked points
-
-**Input:**
-- `session_id` (form field)
-- `points` (JSON array: `[[x1, y1], [x2, y2]]`)
-
-**Output:**
-```json
-{
-  "distance_mm": 127.8
-}
-```
-
-**Formula:** Euclidean distance × scale factor
-
----
-
-### `POST /api/manual-polygon`
-**Purpose:** Measure area of user-drawn polygon
-
-**Input:**
-- `session_id` (form field)
-- `points` (JSON array: `[[x1,y1], [x2,y2], [x3,y3], ...]`)
-
-**Output:**
-```json
-{
-  "area_mm2": 8540.6
-}
-```
-
-**Formula:** Shoelace algorithm × scale factor²
-
----
-
-### `GET /api/warped-frame/{session_id}`
-**Purpose:** Retrieve calibrated warped A4 image for manual mode overlay
-
-**Output:** PNG image (binary)
-
-**Headers:** 
-- `X-Warp-Width: 800`
-- `X-Warp-Height: 1131`
-
----
-
-### `GET /api/warp-dims`
-**Purpose:** Get fixed warped image dimensions for frontend scaling
-
-**Output:**
-```json
-{
-  "warp_width": 800,
-  "warp_height": 1131
-}
-```
-
----
-
-## 2.5 Frontend Features
-
-### Landing Page Components:
-- **HeroSection** — Main banner with CTA button
-- **FeaturesSection** — Key capability highlights
-- **HowItWorksSection** — 3-step workflow explanation
-- **UseCasesSection** — Industry applications (e-commerce, manufacturing, etc.)
-- **CtaSection** — Bottom conversion section
-- **Footer** — Credits and links
-- **Navbar** — Navigation with theme toggle (light/dark mode)
-
-### Demo Page Features:
-- **Camera Controls:**
-  - Start/stop webcam with device selection
-  - Live video preview with overlay canvas
-  - Calibration button (captures frame → `/api/detect-a4`)
-
-- **Measurement Modes:**
-  1. **Auto Detect** — Click "Measure" → `/api/auto-measure` → displays all objects with overlays
-  2. **Line Mode** — Click two points on warped image → `/api/manual-distance`
-  3. **Polygon Mode** — Click 3+ points → close polygon → `/api/manual-polygon`
-
-- **Results Panel:**
-  - Multi-object list with selection (auto mode)
-  - Dimension display (width, height, area, angle)
-  - Shape-specific metrics (circle: radius/diameter, ellipse: axes/eccentricity)
-  - Unit conversion (mm ↔ cm ↔ m ↔ inch ↔ ft)
-  - Clear/reset buttons
-
-- **Canvas Overlay:**
-  - Real-time hover coordinates
-  - Point markers with indices
-  - Distance lines with labels
-  - Polygon outlines with fill
-  - Ellipse rendering for circular objects
-  - Centroid markers
-  - Dimension annotations
-
-### Theme Support:
-- **ThemeContext** with localStorage persistence
-- Light/Dark mode toggle
-- Smooth transitions
-- CSS custom properties for color scheme
-
----
-
-## 2.6 Measurement Accuracy
+<div align="center">
+  <img src="./media/demo_object_image.jpeg" alt="Reference Image with Object Actual Sizes" width="800" />
+  <br/>
+  <em>Reference Image for demo</em>
+</div>
 
 **Expected Precision:**
 - **A4 Detection:** ±0.5mm (sub-pixel corner refinement)
@@ -476,13 +332,6 @@ session = {
 - **Manual Line Measurement:** ±1.0mm to ±5.0mm (sub-pixel click interpolation)
 - **Object Area:** ±2% to ±5% (depending on detection accuracy)
 - **Manual Polygon:** ±1.5% to ±3% (user precision dependent)
-
-**Error Sources:**
-1. Paper warping/curling → ±0.5mm
-2. Camera lens distortion → ±0.3mm (uncorrected in Phase 1)
-3. Non-perpendicular viewing angle → ±1-2mm (homography partially corrects)
-4. Shadow edges → mitigated by illumination normalization
-5. Quantization error → <0.1mm (sub-pixel refinement)
 
 **Best Practices for Accuracy:**
 - Use flat, uncurled A4 sheet
@@ -493,26 +342,24 @@ session = {
 
 ---
 
-## 2.7 Current Limitations
+## 8. Current Limitations
 
 - **Requires A4 reference sheet** — cannot measure without calibration
 - **2D plane assumption** — objects must lie flat on A4 (no depth/volume)
 - **Single-plane measurement** — cannot measure 3D objects or height off surface
 - **No camera calibration** — lens distortion not corrected (±0.3mm error)
 - **In-memory sessions** — data lost on server restart
-- **No authentication** — open access, no user accounts
 - **No measurement history** — cannot save or export measurements
-- **No batch processing** — one image at a time
-- **Manual mode requires recalibration** — if camera moves between calibration and manual clicks
+- **Batch processing** — handles one image snapshot at a time
 
 ---
 
-# 3. How to Run the Application
+## 9. How to Run the Application
 
 ### Prerequisites
 - Python 3.9+ (backend)
 - Node.js 18+ (frontend)
-- Webcam or camera device
+- Webcam (built-in/USB), or a phone camera connected to your PC (e.g., via **Windows Phone Link**, **Camo**, **DroidCam**, etc.)
 
 ### Backend Setup
 ```bash
@@ -524,6 +371,8 @@ venv\Scripts\activate
 #source venv/bin/activate
 pip install -r requirements.txt
 python run.py
+#or 
+uvicorn app.main:app --reload
 # Server runs at http://localhost:8000
 # API docs available at http://localhost:8000/docs
 ```
@@ -550,41 +399,25 @@ VITE_API_URL=http://localhost:8000/api
 
 ---
 
-# 4. Usage Workflow
+## 10. Usage Workflow
 
 ### Step 1: Calibration
-1. Open the demo page
-2. Start your webcam
-3. Place A4 sheet flat in view (ensure all 4 corners visible)
-4. Click **"Calibrate"** button
-5. System detects A4 and establishes scale (0.2625 mm/px)
+1. Open the demo page and start your connected webcam or phone camera
+2. Place A4 sheet flat in view (all corners visible)
+3. Click **"Calibrate"** to establish scale (0.2625 mm/px)
 
 ### Step 2: Measurement
-
-**Auto Mode:**
-1. Place object(s) on A4 sheet
-2. Click **"Measure"** button
-3. System detects and measures all objects
-4. Click objects in results panel to highlight
-
-**Manual Distance Mode:**
-1. Switch to **"Line Mode"**
-2. Click two points on the warped image
-3. Distance displayed instantly
-
-**Manual Polygon Mode:**
-1. Switch to **"Polygon Mode"**
-2. Click 3+ points to define shape
-3. Click first point again to close polygon
-4. Area calculated using Shoelace formula
+- **Auto Mode:** Place objects on A4, click "Measure"
+- **Manual Distance Mode:** Switch to "Line Mode", click two points
+- **Manual Polygon Mode:** Switch to "Polygon Mode", click 3+ points to define shape
 
 ### Step 3: Unit Conversion
-- Toggle between mm, cm, m, inch, ft using unit dropdown
+- Toggle between mm, cm, inch using unit dropdown
 - All measurements update in real-time
 
 ---
 
-# 5. Project Structure
+## 11. Project Structure
 
 ```
 VISION_MATRIX/
@@ -615,90 +448,41 @@ VISION_MATRIX/
 │       │   ├── DemoPage.jsx      # Measurement interface
 │       │   ├── MeasurementCanvas.jsx  # Canvas overlay logic
 │       │   ├── ResultsPanel.jsx  # Results display
-│       │   ├── HeroSection.jsx
-│       │   ├── FeaturesSection.jsx
-│       │   ├── HowItWorksSection.jsx
-│       │   ├── UseCasesSection.jsx
-│       │   ├── CtaSection.jsx
-│       │   ├── Footer.jsx
-│       │   └── Navbar.jsx
+│       │   └── [Other UI Components]
 │       ├── context/
 │       │   └── ThemeContext.jsx  # Light/dark theme
 │       └── utils/
 │           └── api.js            # Backend API calls
+├── media/                        # Documentation images and videos
+├── future_enhancements.md        # Documented roadmap and future phases
 └── README.md
 ```
 
 ---
 
-# 6. Future Phases (Planned)
-
-## Phase 2: SaaS Platform (Authentication + Database)
-- User registration and JWT authentication
-- MongoDB database for measurement history
-- Multi-project/store management
-- Measurement export (CSV, JSON)
-- Analytics dashboard with trends and charts
-
-## Phase 3: Advanced Computer Vision
-- Camera calibration for lens distortion correction
-- Monocular depth estimation (MiDaS model)
-- Stereo vision support
-- Reduced dependency on A4 reference
-
-## Phase 4: 3D Measurement
-- Plane estimation and 3D coordinate reconstruction
-- 3D bounding box detection
-- Volume measurement
-- Point cloud generation
-
-## Phase 5: AI Refinement
-- Machine learning correction models
-- Systematic error compensation
-- Feature-based accuracy prediction
-- Regression models for measurement refinement
-
----
-
-# 7. Technical Highlights
+## 12. Technical Highlights
 
 **What Makes This Project Special:**
-
 1. **Sub-Pixel Precision** — Iterative corner refinement achieves <0.5px localization error
-2. **PCA Dimensioning** — Correct width/height for rotated objects (not axis-aligned boxes)
+2. **PCA Dimensioning** — Correct width/height for rotated objects
 3. **Shadow Robustness** — Illumination normalization handles uneven lighting
 4. **Multi-Object Detection** — Simultaneous measurement of multiple objects with NMS deduplication
 5. **Shape Intelligence** — Distinguishes circles, ellipses, polygons with geometry-specific metrics
 6. **Real-Time Web UI** — Interactive canvas with live coordinate feedback
-7. **Measurement Accuracy** — ±1-5mm for manual lines and ±1-1.5cm for auto-measurement.
-
-**Academic Demonstrations:**
-- Homography transforms (projective geometry)
-- Morphological operations (closing, dilation)
-- Convex hull algorithms
-- Douglas-Peucker polygon approximation
-- PCA via eigenvalue decomposition (minAreaRect)
-- Shoelace formula (Gauss's area formula)
-- CLAHE histogram equalization
-- Non-maximum suppression
-- Ellipse fitting (least-squares optimization)
 
 ---
 
-# 8. Use Cases
-
+## 13. Use Cases
 - **E-Commerce:** Product dimension capture for listings
 - **Manufacturing:** Quality control and part inspection
 - **Packaging:** Box size optimization for shipping
 - **Textiles:** Fabric pattern measurement
 - **Education:** Geometry and measurement labs
 - **Logistics:** Parcel dimensioning for freight calculation
-- **Agriculture:** Crop/fruit size grading
-- **Healthcare:** Wound area tracking
 
 ---
 
-# 9. Known Issues & Troubleshooting
+## 14. Known Issues & Troubleshooting
 
 **Issue:** A4 not detected  
 **Solution:** Ensure full A4 sheet visible, good lighting, high contrast with background
@@ -714,46 +498,9 @@ VISION_MATRIX/
 
 ---
 
-# 10. Contributing & Development
+## 15. Version History
 
-**Code Quality:**
-- Follow PEP 8 (Python) and ESLint rules (JavaScript)
-- Add docstrings for complex algorithms
-- Test edge cases (poor lighting, tilted camera, multiple objects)
-
-**Performance Optimization:**
-- Backend processes frames in <200ms on average CPU
-- Frontend canvas renders at 60 FPS
-- Image encoding: PNG for warped (lossless), Base64 for transmission
-
-**Deployment:**
-- Backend: Docker + Uvicorn ASGI server
-- Frontend: Static build (npm run build) → Nginx/Vercel/Netlify
-- Environment variables for API URLs
-
----
-
-# 11. License & Credits
-
-**Author:** VisionMetrix Team
-
-**Dependencies:**
-- FastAPI (backend framework)
-- OpenCV (computer vision algorithms)
-- React (frontend UI)
-- TailwindCSS (styling)
-- NumPy (numerical computing)
-
-**Acknowledgments:**
-- OpenCV documentation for sub-pixel refinement techniques
-- FastAPI community for async Python patterns
-- Computer vision research papers on homography and PCA dimensioning
-
----
-
-# 12. Version History
-
-**v1.0.0 (Phase 1 Complete)**
+**v1.0.0 (Current Version)**
 - Multi-object automatic detection and measurement
 - Manual distance and polygon tools
 - Real-time webcam integration
@@ -763,12 +510,7 @@ VISION_MATRIX/
 - Full-stack web interface with theme support
 - Session-based calibration
 
-**Next Release (Phase 2):**
-- User authentication
-- Database integration
-- Measurement history
-- Analytics dashboard
+*Refer to [`FUTURE_ENHANCEMENTS.md`](./FUTURE_ENHANCEMENTS.md) for upcoming features and long-term vision.*
 
 ---
-
 **VisionMetrix** — Precision Measurement Through Computer Vision 📐🔬

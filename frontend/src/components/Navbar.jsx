@@ -25,7 +25,7 @@ export default function Navbar() {
     { label: 'Product', href: '#features' },
     { label: 'Solutions', href: '#use-cases' },
     { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Roadmap', href: '#roadmap' },
+    // { label: 'Roadmap', href: '#roadmap' },
   ]
 
   const isDark = theme === 'dark'
